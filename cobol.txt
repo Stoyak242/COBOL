@@ -1,0 +1,72 @@
+IDENTIFICATION DIVISION.
+PROGRAM-ID. SolveMaze.
+
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 MazeArray.
+   05 MazeRow OCCURS 10 TIMES.
+      10 MazeColumn OCCURS 10 TIMES PIC X.
+
+01 StartRow PIC 99.
+01 StartColumn PIC 99.
+01 EndRow PIC 99.
+01 EndColumn PIC 99.
+
+PROCEDURE DIVISION.
+    PERFORM ReadMaze
+    PERFORM SolveMaze
+    PERFORM DisplaySolution
+    STOP RUN.
+
+ReadMaze.
+    DISPLAY "Enter the maze (10x10 grid):"
+    PERFORM VARYING I FROM 1 BY 1 UNTIL I > 10
+        ACCEPT MazeRow(I)
+    END-PERFORM.
+
+    DISPLAY "Enter the starting position (row column):"
+    ACCEPT StartRow
+    ACCEPT StartColumn.
+
+    DISPLAY "Enter the ending position (row column):"
+    ACCEPT EndRow
+    ACCEPT EndColumn.
+
+SolveMaze.
+    MOVE StartRow TO MazeRow(StartRow)(StartColumn)
+    PERFORM SolveMazeRecursive USING StartRow, StartColumn
+    IF MazeRow(EndRow)(EndColumn) = 'X'
+        MOVE "Solved" TO MazeRow(EndRow)(EndColumn)
+    ELSE
+        MOVE "Unsolvable" TO MazeRow(EndRow)(EndColumn)
+    END-IF.
+
+SolveMazeRecursive USING CurrentRow, CurrentColumn.
+    IF CurrentRow = EndRow AND CurrentColumn = EndColumn
+        MOVE "X" TO MazeRow(CurrentRow)(CurrentColumn)
+        EXIT PERFORM
+    END-IF.
+
+    MOVE "X" TO MazeRow(CurrentRow)(CurrentColumn)
+
+    IF MazeRow(CurrentRow + 1)(CurrentColumn) = ' '
+        PERFORM SolveMazeRecursive USING CurrentRow + 1, CurrentColumn
+    END-IF.
+
+    IF MazeRow(CurrentRow - 1)(CurrentColumn) = ' '
+        PERFORM SolveMazeRecursive USING CurrentRow - 1, CurrentColumn
+    END-IF.
+
+    IF MazeRow(CurrentRow)(CurrentColumn + 1) = ' '
+        PERFORM SolveMazeRecursive USING CurrentRow, CurrentColumn + 1
+    END-IF.
+
+    IF MazeRow(CurrentRow)(CurrentColumn - 1) = ' '
+        PERFORM SolveMazeRecursive USING CurrentRow, CurrentColumn - 1
+    END-IF.
+
+DisplaySolution.
+    DISPLAY "Solution:"
+    PERFORM VARYING I FROM 1 BY 1 UNTIL I > 10
+        DISPLAY MazeRow(I)
+    END-PERFORM.
